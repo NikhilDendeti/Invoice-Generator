@@ -17,19 +17,20 @@ const MobileNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 lg:hidden z-40">
+    <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 lg:hidden z-40 shadow-2xl">
       <div className="flex justify-around">
-        {navigation.map((item) => {
+        {navigation.map((item, index) => {
           const Icon = item.icon;
           return (
             <Link
               key={item.name}
               to={item.href}
-              className={`flex flex-col items-center py-3 px-4 transition-all duration-200 ${
+              className={`flex flex-col items-center py-3 px-4 transition-all duration-300 hover-lift-enhanced ${
                 isActive(item.href)
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-blue-600 bg-gradient-to-t from-blue-50 to-blue-100 shadow-lg'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
+              style={{ animationDelay: `${index * 0.1}s` }}
             >
               <Icon className="h-6 w-6 mb-1" />
               <span className="text-xs font-medium">{item.name}</span>

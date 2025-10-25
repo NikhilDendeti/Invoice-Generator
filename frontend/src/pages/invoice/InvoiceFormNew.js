@@ -26,7 +26,7 @@ import {
   FiMapPin,
 } from 'react-icons/fi';
 
-const InvoiceForm = () => {
+const InvoiceFormNew = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -84,7 +84,7 @@ const InvoiceForm = () => {
   // Fetch invoice for editing
   const { data: invoiceData, isLoading } = useQuery(
     ['invoice', id],
-    () => invoiceAPI.getInvoice(id),
+    () => invoiceAPI.get(`/invoices/${id}`),
     {
       enabled: isEdit,
       onSuccess: (data) => {
@@ -99,37 +99,14 @@ const InvoiceForm = () => {
 
   // Create/Update mutation
   const mutation = useMutation(
-    (data) => isEdit ? invoiceAPI.updateInvoice(id, data) : invoiceAPI.createInvoice(data),
+    (data) => isEdit ? invoiceAPI.put(`/invoices/${id}`, data) : invoiceAPI.post('/invoices', data),
     {
       onSuccess: (data) => {
-        console.log('Invoice saved successfully:', data);
         toast.success(isEdit ? 'Invoice updated successfully!' : 'Invoice created successfully!');
-        
-        // Invalidate all invoice-related queries to refresh the list and dashboard
-        console.log('Invalidating invoice queries...');
-        queryClient.invalidateQueries(['invoices']);
         queryClient.invalidateQueries('invoices');
-        queryClient.invalidateQueries('invoiceStats');
-        queryClient.invalidateQueries('recentInvoices');
-        
-        // Also invalidate any queries that start with 'invoices' to catch all variations
-        queryClient.invalidateQueries({
-          predicate: (query) => {
-            return query.queryKey[0] === 'invoices' || 
-                   query.queryKey[0] === 'invoiceStats' || 
-                   query.queryKey[0] === 'recentInvoices';
-          }
-        });
-        console.log('Invoice queries invalidated successfully');
-        
-        // Navigate to invoices list after a short delay to ensure queries are invalidated
-        setTimeout(() => {
-          navigate('/invoices');
-        }, 100);
+        navigate('/invoices');
       },
       onError: (error) => {
-        console.error('Invoice save error:', error);
-        console.error('Error response:', error.response);
         toast.error(error.response?.data?.message || 'Failed to save invoice');
       }
     }
@@ -156,8 +133,6 @@ const InvoiceForm = () => {
     const updatedItems = [...lineItems];
     updatedItems[index] = { ...updatedItems[index], [field]: value };
     setLineItems(updatedItems);
-    console.log('Updated line item:', updatedItems[index]); // Debug log
-    console.log('All line items:', updatedItems); // Debug all items
   };
 
   const calculateLineTotal = (item) => {
@@ -178,41 +153,15 @@ const InvoiceForm = () => {
   };
 
   const onSubmit = (data) => {
-    console.log('Form submitted with data:', data);
-    console.log('Line items:', lineItems);
-    console.log('Form errors:', errors);
-    
-    // Validate that we have at least one item with description
-    const validItems = lineItems.filter(item => item.description.trim() !== '');
-    if (validItems.length === 0) {
-      toast.error('Please add at least one item with a description');
-      return;
-    }
-    
-    // Remove id field and ensure only valid fields are sent
-    const cleanItems = validItems.map(item => ({
-      description: item.description.trim(),
-      quantity: parseFloat(item.quantity) || 0,
-      rate: parseFloat(item.rate) || 0,
-      taxRate: parseFloat(item.taxRate) || 0
-      // Note: total is calculated by backend, so we don't send it
-    }));
-    
-    console.log('Original items:', validItems);
-    console.log('Cleaned items (without id):', cleanItems);
-    
     const totals = calculateTotals();
     const invoiceData = {
       ...data,
-      items: cleanItems, // Use cleaned items without id field
+      lineItems,
       subtotal: totals.subtotal,
-      taxTotal: totals.totalTax, // Changed from totalTax to taxTotal to match backend
+      totalTax: totals.totalTax,
       total: totals.total,
       status: 'draft'
     };
-    
-    console.log('Final invoice data:', invoiceData);
-    console.log('Mutation loading state:', mutation.isLoading);
     mutation.mutate(invoiceData);
   };
 
@@ -335,7 +284,7 @@ const InvoiceForm = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           {/* Client Information */}
           <div className="form-section">
             <div className="form-section-header">
@@ -356,10 +305,7 @@ const InvoiceForm = () => {
                     <span className="form-label-required">*</span>
                   </label>
                   <input
-                    {...register('client.name', { 
-                      required: 'Client name is required',
-                      minLength: { value: 2, message: 'Client name must be at least 2 characters' }
-                    })}
+                    {...register('client.name', { required: 'Client name is required' })}
                     className={`form-input ${errors.client?.name ? 'error' : ''}`}
                     placeholder="Enter client name"
                   />
@@ -444,15 +390,7 @@ const InvoiceForm = () => {
                     <span className="form-label-required">*</span>
                   </label>
                   <input
-                    {...register('issueDate', { 
-                      required: 'Issue date is required',
-                      validate: (value) => {
-                        const date = new Date(value);
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        return date >= today || 'Issue date cannot be in the past';
-                      }
-                    })}
+                    {...register('issueDate', { required: 'Issue date is required' })}
                     type="date"
                     className={`form-input ${errors.issueDate ? 'error' : ''}`}
                   />
@@ -471,14 +409,7 @@ const InvoiceForm = () => {
                     <span className="form-label-required">*</span>
                   </label>
                   <input
-                    {...register('dueDate', { 
-                      required: 'Due date is required',
-                      validate: (value) => {
-                        const dueDate = new Date(value);
-                        const issueDate = new Date(watch('issueDate'));
-                        return dueDate > issueDate || 'Due date must be after issue date';
-                      }
-                    })}
+                    {...register('dueDate', { required: 'Due date is required' })}
                     type="date"
                     className={`form-input ${errors.dueDate ? 'error' : ''}`}
                   />
@@ -545,44 +476,32 @@ const InvoiceForm = () => {
                       <td>
                         <input
                           type="number"
-                          value={item.quantity || ''}
-                          onChange={(e) => {
-                            console.log('Quantity changed:', e.target.value);
-                            updateLineItem(index, 'quantity', parseFloat(e.target.value) || 0);
-                          }}
-                          className="line-item-input"
-                          min="0.01"
-                          step="0.01"
-                          placeholder="0"
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          value={item.rate || ''}
-                          onChange={(e) => {
-                            console.log('Rate changed:', e.target.value);
-                            updateLineItem(index, 'rate', parseFloat(e.target.value) || 0);
-                          }}
+                          value={item.quantity}
+                          onChange={(e) => updateLineItem(index, 'quantity', parseFloat(e.target.value) || 0)}
                           className="line-item-input"
                           min="0"
                           step="0.01"
-                          placeholder="0.00"
                         />
                       </td>
                       <td>
                         <input
                           type="number"
-                          value={item.taxRate || ''}
-                          onChange={(e) => {
-                            console.log('Tax rate changed:', e.target.value);
-                            updateLineItem(index, 'taxRate', parseFloat(e.target.value) || 0);
-                          }}
+                          value={item.rate}
+                          onChange={(e) => updateLineItem(index, 'rate', parseFloat(e.target.value) || 0)}
+                          className="line-item-input"
+                          min="0"
+                          step="0.01"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          value={item.taxRate}
+                          onChange={(e) => updateLineItem(index, 'taxRate', parseFloat(e.target.value) || 0)}
                           className="line-item-input"
                           min="0"
                           max="100"
                           step="0.01"
-                          placeholder="0"
                         />
                       </td>
                       <td>
@@ -681,4 +600,4 @@ const InvoiceForm = () => {
   );
 };
 
-export default InvoiceForm;
+export default InvoiceFormNew;

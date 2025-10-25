@@ -24,14 +24,18 @@ const InvoiceList = () => {
     () => invoiceAPI.getInvoices(filters),
     {
       onError: (error) => {
+        console.error('InvoiceList - API Error:', error);
         toast.error('Failed to load invoices');
       }
     }
   );
 
-  const invoices = data?.data?.invoices || [];
-  const pagination = data?.data?.pagination || {};
-  const stats = data?.data?.stats || {};
+  const invoices = data?.invoices || [];
+  const pagination = data?.pagination || {};
+  const stats = data?.stats || {};
+  
+  // Debug logging (can be removed in production)
+  console.log('InvoiceList - Invoices loaded:', invoices.length);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {

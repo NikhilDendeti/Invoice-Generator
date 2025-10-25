@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
           
           // Verify token and get user
           const response = await authAPI.get('/auth/profile');
-          dispatch({ type: 'SET_USER', payload: response.data.data.user });
+          dispatch({ type: 'SET_USER', payload: response.data.user });
         } else {
           dispatch({ type: 'SET_LOADING', payload: false });
         }
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: true });
       
       const response = await authAPI.post('/auth/login', { email, password });
-      const { user, token } = response.data.data;
+      const { user, token } = response.data;
       
       // Store token
       localStorage.setItem('token', token);
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: 'SET_LOADING', payload: true });
       
       const response = await authAPI.post('/auth/signup', userData);
-      const { user, token } = response.data.data;
+      const { user, token } = response.data;
       
       // Store token
       localStorage.setItem('token', token);
@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     try {
       const response = await authAPI.put('/auth/profile', profileData);
-      const { user } = response.data.data;
+      const { user } = response.data;
       
       dispatch({ type: 'UPDATE_USER', payload: user });
       return { success: true };

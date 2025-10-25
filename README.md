@@ -74,7 +74,7 @@ JWT_SECRET=your-super-secret-jwt-key-here
 JWT_EXPIRE=7d
 
 # Server
-PORT=5000
+PORT=5002
 NODE_ENV=development
 
 # Email Configuration (for sending PDFs)
@@ -93,14 +93,14 @@ RATE_LIMIT_MAX_REQUESTS=100
 
 # PDF Generation
 PDF_STORAGE_PATH=./generated-pdfs
-PDF_BASE_URL=http://localhost:5000/api/pdf/download
+cPDF_BASE_URL=http://localhost:5002/api/pdf/download
 ```
 
 #### Frontend Environment Variables
 Create a `.env` file in the `frontend` directory:
 
 ```env
-REACT_APP_API_URL=http://localhost:5000/api
+REACT_APP_API_URL=http://localhost:5002/api
 ```
 
 ### 4. Database Setup
@@ -114,7 +114,7 @@ Make sure MongoDB is running locally or you have a MongoDB Atlas connection stri
 npm run dev
 ```
 
-This will start both the backend server (port 5000) and frontend development server (port 3000).
+This will start both the backend server (port 5002) and frontend development server (port 3000).
 
 #### Production Mode
 ```bash

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5001/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5002/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -26,7 +26,7 @@ api.interceptors.request.use(
 // Response interceptor to handle errors
 api.interceptors.response.use(
   (response) => {
-    return response;
+    return response.data; // Return only the data part of the response
   },
   (error) => {
     if (error.response?.status === 401) {

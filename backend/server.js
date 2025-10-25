@@ -10,6 +10,12 @@ require('dotenv').config();
 // Import database connection
 const connectDB = require('./config/database');
 
+// Import models to ensure they are registered
+require('./models/User');
+require('./models/Invoice');
+require('./models/Counter');
+require('./models/PdfRecord');
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const invoiceRoutes = require('./routes/invoices');
@@ -129,7 +135,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5002;
 
 const server = app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);

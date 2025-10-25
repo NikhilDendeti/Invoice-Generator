@@ -150,6 +150,8 @@ const getInvoice = async (req, res) => {
 // @access  Private
 const createInvoice = async (req, res) => {
   try {
+    console.log('Creating invoice with data:', JSON.stringify(req.body, null, 2));
+    
     const user = await User.findById(req.user.id);
     
     // Generate invoice number
@@ -175,11 +177,23 @@ const createInvoice = async (req, res) => {
     
     // Handle validation errors
     if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map(e => e.message);
+      const errors = Object.values(error.errors).map(e => ({
+        field: e.path,
+        message: e.message
+      }));
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
         errors
+      });
+    }
+    
+    // Handle duplicate key errors (should not happen with atomic counter, but just in case)
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: 'Invoice number conflict. Please try again.',
+        error: 'Duplicate invoice number detected'
       });
     }
     

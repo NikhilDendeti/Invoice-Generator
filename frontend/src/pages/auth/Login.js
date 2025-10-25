@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { FiEye, FiEyeOff, FiMail, FiLock } from 'react-icons/fi';
+import './Login.css';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,38 +35,41 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 animate-fade-in">
-        <div className="text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg mb-6">
-            <span className="text-white font-bold text-2xl">IG</span>
+    <div className="login-container">
+      {/* Enhanced Background Elements */}
+      <div className="login-background">
+        <div className="login-orb login-orb-1"></div>
+        <div className="login-orb login-orb-2"></div>
+        <div className="login-orb login-orb-3"></div>
+      </div>
+      
+      <div className="login-content">
+        <div className="login-header">
+          <div className="login-logo">
+            <span className="login-logo-text">IG</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="login-title">
             Welcome back
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="login-subtitle">
             Sign in to your account or{' '}
             <Link
               to="/signup"
-              className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+              className="login-link"
             >
               create a new account
             </Link>
           </p>
         </div>
         
-        <div className="card hover-lift">
-          <div className="card-body">
-            <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-              <div className="space-y-4">
-            <div>
+        <div className="login-form-container">
+          <form className="login-form" onSubmit={handleSubmit(onSubmit)}>
+            <div className="form-group">
               <label htmlFor="email" className="form-label">
+                <FiMail className="form-label-icon" />
                 Email address
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-gray-400" />
-                </div>
+              <div className="form-input-container">
                 <input
                   {...register('email', {
                     required: 'Email is required',
@@ -75,23 +79,24 @@ const Login = () => {
                     }
                   })}
                   type="email"
-                  className={`form-input pl-10 ${errors.email ? 'error' : ''}`}
+                  className={`form-input ${errors.email ? 'error' : ''}`}
                   placeholder="Enter your email"
                 />
+                <FiMail className="form-input-icon" />
               </div>
               {errors.email && (
-                <p className="form-error">{errors.email.message}</p>
+                <div className="form-error">
+                  <span>{errors.email.message}</span>
+                </div>
               )}
             </div>
 
-            <div>
+            <div className="form-group">
               <label htmlFor="password" className="form-label">
+                <FiLock className="form-label-icon" />
                 Password
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-gray-400" />
-                </div>
+              <div className="form-input-container">
                 <input
                   {...register('password', {
                     required: 'Password is required',
@@ -101,45 +106,46 @@ const Login = () => {
                     }
                   })}
                   type={showPassword ? 'text' : 'password'}
-                  className={`form-input pl-10 pr-10 ${errors.password ? 'error' : ''}`}
+                  className={`form-input ${errors.password ? 'error' : ''}`}
                   placeholder="Enter your password"
                 />
+                <FiLock className="form-input-icon" />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <FiEyeOff className="h-5 w-5 text-gray-400" />
+                    <FiEyeOff className="h-5 w-5" />
                   ) : (
-                    <FiEye className="h-5 w-5 text-gray-400" />
+                    <FiEye className="h-5 w-5" />
                   )}
                 </button>
               </div>
               {errors.password && (
-                <p className="form-error">{errors.password.message}</p>
+                <div className="form-error">
+                  <span>{errors.password.message}</span>
+                </div>
               )}
             </div>
-          </div>
 
-              <div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="btn btn-primary w-full hover-lift"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="loading"></div>
-                      Signing in...
-                    </>
-                  ) : (
-                    'Sign in'
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="login-button"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="loading-spinner"></div>
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign in'
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

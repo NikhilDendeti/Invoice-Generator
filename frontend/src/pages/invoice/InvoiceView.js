@@ -52,7 +52,7 @@ const InvoiceView = () => {
     }
   );
 
-  const invoice = data?.data?.invoice;
+  const invoice = data?.invoice;
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -106,7 +106,7 @@ const InvoiceView = () => {
       if (response.data.success) {
         toast.success('PDF generated successfully');
         // Open PDF in new tab
-        window.open(response.data.data.pdfUrl, '_blank');
+        window.open(response.data.pdfUrl, '_blank');
       }
     } catch (error) {
       toast.error('Failed to generate PDF');

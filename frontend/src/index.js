@@ -34,7 +34,7 @@ root.render(
               duration: 3000,
             },
             error: {
-              duration: 5000,
+              duration: 5001,
             },
           }}
         />

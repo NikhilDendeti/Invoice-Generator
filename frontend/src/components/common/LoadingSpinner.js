@@ -14,9 +14,9 @@ const LoadingSpinner = ({
 
   return (
     <div className={`flex flex-col items-center justify-center space-y-3 ${className}`}>
-      <div className={`loading ${sizeClasses[size]}`}></div>
+      <div className={`loading loading-enhanced ${sizeClasses[size]} animate-glow`}></div>
       {text && (
-        <p className="text-sm text-gray-600 animate-pulse">{text}</p>
+        <p className="text-sm text-gray-600 animate-pulse text-gradient">{text}</p>
       )}
     </div>
   );

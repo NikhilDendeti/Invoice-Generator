@@ -57,6 +57,7 @@ const StatusBadge = ({ status, size = 'md', className = '' }) => {
         ${config.color}
         ${sizeClasses[size]}
         ${className}
+        hover-lift-enhanced status-indicator
       `}
     >
       <span className="mr-1">{config.icon}</span>

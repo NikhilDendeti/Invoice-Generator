@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { authAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 import { FiSave, FiEye, FiEyeOff, FiUser, FiMail, FiLock } from 'react-icons/fi';
+import './Profile.css';
 
 const Profile = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -68,8 +69,9 @@ const Profile = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="loading"></div>
+      <div className="profile-loading">
+        <div className="profile-loading-spinner"></div>
+        <span>Loading profile...</span>
       </div>
     );
   }
@@ -77,70 +79,112 @@ const Profile = () => {
   const user = profileData?.data?.user;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="profile-container">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-        <p className="text-gray-600">Manage your personal information and account settings.</p>
+      <div className="profile-header">
+        <h1 className="profile-title">Profile</h1>
+        <p className="profile-subtitle">Manage your personal information and account settings.</p>
       </div>
 
-      {/* Profile Information */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+      {/* Profile Avatar Section */}
+      <div className="profile-section">
+        <div className="profile-section-header">
+          <div className="profile-section-icon blue">
+            <FiUser className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="profile-section-title">Profile Information</h3>
+            <p className="profile-section-subtitle">Update your personal details</p>
+          </div>
         </div>
-        <div className="card-body">
-          <form onSubmit={handleSubmit(onSubmitProfile)} className="space-y-4">
-            <div>
-              <label className="form-label">Full Name</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiUser className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  {...register('name', { required: 'Name is required' })}
-                  className={`form-input pl-10 ${errors.name ? 'error' : ''}`}
-                  placeholder="Enter your full name"
-                />
+        <div className="profile-section-content">
+          <div className="profile-avatar-section">
+            <div className="profile-avatar">
+              <span>{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+            </div>
+            <div className="profile-avatar-info">
+              <h3 className="profile-avatar-name">{user?.name || 'User'}</h3>
+              <p className="profile-avatar-email">{user?.email || 'user@example.com'}</p>
+              <div className="profile-avatar-actions">
+                <button className="profile-avatar-button">
+                  <FiUser className="h-4 w-4" />
+                  Change Avatar
+                </button>
+                <button className="profile-avatar-button primary">
+                  <FiSave className="h-4 w-4" />
+                  Update Profile
+                </button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Personal Information */}
+      <div className="profile-section">
+        <div className="profile-section-header">
+          <div className="profile-section-icon green">
+            <FiUser className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="profile-section-title">Personal Information</h3>
+            <p className="profile-section-subtitle">Update your personal details</p>
+          </div>
+        </div>
+        <div className="profile-section-content">
+          <form onSubmit={handleSubmit(onSubmitProfile)} className="profile-form-grid">
+            <div className="profile-form-group">
+              <label className="profile-form-label">
+                <FiUser className="h-4 w-4" />
+                Full Name
+                <span className="profile-form-label-required">*</span>
+              </label>
+              <input
+                {...register('name', { required: 'Name is required' })}
+                className={`profile-form-input ${errors.name ? 'error' : ''}`}
+                placeholder="Enter your full name"
+              />
               {errors.name && (
-                <p className="form-error">{errors.name.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="form-label">Email Address</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="h-5 w-5 text-gray-400" />
+                <div className="profile-form-error">
+                  <span>{errors.name.message}</span>
                 </div>
-                <input
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^\S+@\S+$/i,
-                      message: 'Invalid email address'
-                    }
-                  })}
-                  type="email"
-                  className={`form-input pl-10 ${errors.email ? 'error' : ''}`}
-                  placeholder="Enter your email"
-                />
-              </div>
-              {errors.email && (
-                <p className="form-error">{errors.email.message}</p>
               )}
             </div>
 
-            <div className="flex justify-end">
+            <div className="profile-form-group">
+              <label className="profile-form-label">
+                <FiMail className="h-4 w-4" />
+                Email Address
+                <span className="profile-form-label-required">*</span>
+              </label>
+              <input
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^\S+@\S+$/i,
+                    message: 'Invalid email address'
+                  }
+                })}
+                type="email"
+                className={`profile-form-input ${errors.email ? 'error' : ''}`}
+                placeholder="Enter your email"
+              />
+              {errors.email && (
+                <div className="profile-form-error">
+                  <span>{errors.email.message}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="profile-form-actions">
               <button
                 type="submit"
                 disabled={updateMutation.isLoading}
-                className="btn btn-primary"
+                className="profile-form-button save"
               >
                 {updateMutation.isLoading ? (
                   <>
-                    <div className="loading"></div>
+                    <div className="loading-spinner"></div>
                     Saving...
                   </>
                 ) : (
@@ -156,121 +200,97 @@ const Profile = () => {
       </div>
 
       {/* Change Password */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-lg font-semibold text-gray-900">Change Password</h3>
+      <div className="password-section">
+        <div className="password-section-header">
+          <div className="password-section-icon">
+            <FiLock className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="password-section-title">Change Password</h3>
+            <p className="password-section-subtitle">Update your account password</p>
+          </div>
         </div>
-        <div className="card-body">
-          <form id="passwordForm" onSubmit={handleSubmit(onSubmitPassword)} className="space-y-4">
-            <div>
-              <label className="form-label">Current Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  {...register('currentPassword', { required: 'Current password is required' })}
-                  type={showCurrentPassword ? 'text' : 'password'}
-                  className={`form-input pl-10 pr-10 ${errors.currentPassword ? 'error' : ''}`}
-                  placeholder="Enter current password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                >
-                  {showCurrentPassword ? (
-                    <FiEyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <FiEye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
+        <div className="password-section-content">
+          <form id="passwordForm" onSubmit={handleSubmit(onSubmitPassword)} className="password-form-grid">
+            <div className="password-form-group">
+              <label className="password-form-label">
+                <FiLock className="h-4 w-4" />
+                Current Password
+                <span className="profile-form-label-required">*</span>
+              </label>
+              <input
+                {...register('currentPassword', { required: 'Current password is required' })}
+                type={showCurrentPassword ? 'text' : 'password'}
+                className={`password-form-input ${errors.currentPassword ? 'error' : ''}`}
+                placeholder="Enter current password"
+              />
               {errors.currentPassword && (
-                <p className="form-error">{errors.currentPassword.message}</p>
+                <div className="password-form-error">
+                  <span>{errors.currentPassword.message}</span>
+                </div>
               )}
             </div>
 
-            <div>
-              <label className="form-label">New Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  {...register('newPassword', {
-                    required: 'New password is required',
-                    minLength: {
-                      value: 6,
-                      message: 'Password must be at least 6 characters'
-                    },
-                    pattern: {
-                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-                      message: 'Password must contain uppercase, lowercase, and number'
-                    }
-                  })}
-                  type={showNewPassword ? 'text' : 'password'}
-                  className={`form-input pl-10 pr-10 ${errors.newPassword ? 'error' : ''}`}
-                  placeholder="Enter new password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                >
-                  {showNewPassword ? (
-                    <FiEyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <FiEye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
+            <div className="password-form-group">
+              <label className="password-form-label">
+                <FiLock className="h-4 w-4" />
+                New Password
+                <span className="profile-form-label-required">*</span>
+              </label>
+              <input
+                {...register('newPassword', {
+                  required: 'New password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Password must be at least 6 characters'
+                  },
+                  pattern: {
+                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+                    message: 'Password must contain uppercase, lowercase, and number'
+                  }
+                })}
+                type={showNewPassword ? 'text' : 'password'}
+                className={`password-form-input ${errors.newPassword ? 'error' : ''}`}
+                placeholder="Enter new password"
+              />
               {errors.newPassword && (
-                <p className="form-error">{errors.newPassword.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="form-label">Confirm New Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-gray-400" />
+                <div className="password-form-error">
+                  <span>{errors.newPassword.message}</span>
                 </div>
-                <input
-                  {...register('confirmPassword', {
-                    required: 'Please confirm your password',
-                    validate: value => value === newPassword || 'Passwords do not match'
-                  })}
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  className={`form-input pl-10 pr-10 ${errors.confirmPassword ? 'error' : ''}`}
-                  placeholder="Confirm new password"
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <FiEyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <FiEye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="form-error">{errors.confirmPassword.message}</p>
               )}
             </div>
 
-            <div className="flex justify-end">
+            <div className="password-form-group">
+              <label className="password-form-label">
+                <FiLock className="h-4 w-4" />
+                Confirm New Password
+                <span className="profile-form-label-required">*</span>
+              </label>
+              <input
+                {...register('confirmPassword', {
+                  required: 'Please confirm your password',
+                  validate: value => value === newPassword || 'Passwords do not match'
+                })}
+                type={showConfirmPassword ? 'text' : 'password'}
+                className={`password-form-input ${errors.confirmPassword ? 'error' : ''}`}
+                placeholder="Confirm new password"
+              />
+              {errors.confirmPassword && (
+                <div className="password-form-error">
+                  <span>{errors.confirmPassword.message}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="profile-form-actions">
               <button
                 type="submit"
                 disabled={passwordMutation.isLoading}
-                className="btn btn-primary"
+                className="profile-form-button save"
               >
                 {passwordMutation.isLoading ? (
                   <>
-                    <div className="loading"></div>
+                    <div className="loading-spinner"></div>
                     Changing...
                   </>
                 ) : (
@@ -282,35 +302,6 @@ const Profile = () => {
               </button>
             </div>
           </form>
-        </div>
-      </div>
-
-      {/* Account Information */}
-      <div className="card">
-        <div className="card-header">
-          <h3 className="text-lg font-semibold text-gray-900">Account Information</h3>
-        </div>
-        <div className="card-body">
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Account Created:</span>
-              <span className="font-medium">
-                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Last Login:</span>
-              <span className="font-medium">
-                {user?.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'N/A'}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Email Verified:</span>
-              <span className={`font-medium ${user?.isEmailVerified ? 'text-green-600' : 'text-red-600'}`}>
-                {user?.isEmailVerified ? 'Yes' : 'No'}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

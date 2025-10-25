@@ -214,15 +214,52 @@ invoiceSchema.pre('save', function(next) {
 // Method to generate invoice number
 invoiceSchema.statics.generateInvoiceNumber = async function(userId, prefix = 'INV') {
   const year = new Date().getFullYear();
-  const count = await this.countDocuments({ 
+  
+  // Get Counter model dynamically to avoid circular dependencies
+  const Counter = mongoose.model('Counter');
+  
+  // Check if counter exists, if not initialize it based on existing invoices
+  let counter = await Counter.findOne({ 
     userId, 
-    createdAt: { 
-      $gte: new Date(year, 0, 1), 
-      $lt: new Date(year + 1, 0, 1) 
-    } 
+    year,
+    type: 'invoice' 
   });
   
-  const sequence = String(count + 1).padStart(4, '0');
+  if (!counter) {
+    // Count existing invoices for this user and year
+    const existingCount = await this.countDocuments({ 
+      userId, 
+      createdAt: { 
+        $gte: new Date(year, 0, 1), 
+        $lt: new Date(year + 1, 0, 1) 
+      } 
+    });
+    
+    // Create counter with the next number
+    counter = await Counter.create({
+      userId,
+      year,
+      type: 'invoice',
+      count: existingCount
+    });
+  }
+  
+  // Atomically increment the counter
+  counter = await Counter.findOneAndUpdate(
+    { 
+      userId, 
+      year,
+      type: 'invoice' 
+    },
+    { 
+      $inc: { count: 1 } 
+    },
+    { 
+      new: true
+    }
+  );
+  
+  const sequence = String(counter.count).padStart(4, '0');
   return `${prefix}-${year}-${sequence}`;
 };
 

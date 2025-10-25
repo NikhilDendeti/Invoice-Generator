@@ -523,7 +523,7 @@ class PdfService {
         userId: user._id,
         fileName,
         filePath,
-        fileUrl: `${process.env.PDF_BASE_URL || 'http://localhost:5000/api/pdf/download'}/${fileName}`,
+        fileUrl: `${process.env.PDF_BASE_URL || 'http://localhost:5002/api/pdf/download'}/${fileName}`,
         fileSize: pdfBuffer.length,
         format: options.format || 'A4',
         includeTerms: options.includeTerms !== false
