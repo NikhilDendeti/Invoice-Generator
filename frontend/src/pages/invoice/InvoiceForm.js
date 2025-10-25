@@ -40,6 +40,7 @@ const InvoiceForm = () => {
   const [lineItems, setLineItems] = useState([
     { id: 1, description: '', quantity: 1, rate: 0, taxRate: 0 }
   ]);
+  const [forceUpdate, setForceUpdate] = useState(0);
 
   const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm({
     defaultValues: {
@@ -136,6 +137,9 @@ const InvoiceForm = () => {
   );
 
   const addLineItem = () => {
+    console.log('Adding new line item...');
+    console.log('Current line items:', lineItems);
+    
     const newItem = {
       id: Date.now(),
       description: '',
@@ -143,7 +147,12 @@ const InvoiceForm = () => {
       rate: 0,
       taxRate: 0
     };
-    setLineItems([...lineItems, newItem]);
+    
+    const updatedItems = [...lineItems, newItem];
+    console.log('Updated line items:', updatedItems);
+    
+    setLineItems(updatedItems);
+    setForceUpdate(prev => prev + 1); // Force re-render
   };
 
   const removeLineItem = (index) => {
@@ -501,15 +510,29 @@ const InvoiceForm = () => {
                   <FiDollarSign className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="line-items-title">Line Items</h3>
+                  <h3 className="line-items-title">Line Items ({lineItems.length})</h3>
                   <p className="line-items-subtitle">Add products or services to your invoice</p>
+                  <p style={{color: 'red', fontSize: '12px'}}>Debug: {lineItems.length} items, Force Update: {forceUpdate}</p>
                 </div>
               </div>
               <div className="line-items-actions">
                 <button
                   type="button"
-                  onClick={addLineItem}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Add Item button clicked');
+                    alert('Add Item button clicked!'); // Temporary debug
+                    addLineItem();
+                  }}
                   className="add-item-button"
+                  style={{ 
+                    backgroundColor: '#10b981', 
+                    color: 'white', 
+                    border: '2px solid #059669',
+                    zIndex: 1000,
+                    position: 'relative'
+                  }}
                 >
                   <FiPlus className="h-5 w-5" />
                   Add Item
@@ -518,6 +541,11 @@ const InvoiceForm = () => {
             </div>
             
             <div className="line-items-table-container">
+              <div style={{backgroundColor: 'yellow', padding: '10px', margin: '10px'}}>
+                DEBUG: Table should show {lineItems.length} rows
+                <br />
+                Items: {JSON.stringify(lineItems.map(item => ({id: item.id, description: item.description})))}
+              </div>
               <table className="line-items-table">
                 <thead>
                   <tr>
@@ -530,8 +558,15 @@ const InvoiceForm = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {lineItems.map((item, index) => (
-                    <tr key={item.id || index}>
+                  {console.log('Rendering line items:', lineItems.length, lineItems)}
+                  {/* Test row to verify table rendering */}
+                  <tr style={{backgroundColor: 'red', color: 'white'}}>
+                    <td colSpan="6">TEST ROW - If you see this, table is working</td>
+                  </tr>
+                  {lineItems.map((item, index) => {
+                    console.log(`Rendering item ${index}:`, item);
+                    return (
+                    <tr key={item.id || index} style={{backgroundColor: index % 2 === 0 ? '#f0f0f0' : 'white'}}>
                       <td>
                         <input
                           type="text"
@@ -603,7 +638,8 @@ const InvoiceForm = () => {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
