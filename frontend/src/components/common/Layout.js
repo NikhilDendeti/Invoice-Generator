@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { FiMenu, FiX, FiHome, FiFileText, FiSettings, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiX, FiHome, FiFileText, FiSettings, FiUser, FiLogOut, FiDownload } from 'react-icons/fi';
 import MobileNav from './MobileNav';
 import ThemeToggle from './ThemeToggle';
 import './Layout.css';
@@ -20,6 +20,7 @@ const Layout = ({ children }) => {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: FiHome },
     { name: 'Invoices', href: '/invoices', icon: FiFileText },
+    { name: 'PDF Library', href: '/pdf-library', icon: FiDownload },
     { name: 'Settings', href: '/settings', icon: FiSettings },
     { name: 'Profile', href: '/profile', icon: FiUser },
   ];

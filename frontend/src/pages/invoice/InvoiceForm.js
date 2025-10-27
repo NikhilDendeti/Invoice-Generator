@@ -192,18 +192,23 @@ const InvoiceForm = () => {
     console.log('Form errors:', errors);
     
     // Validate that we have at least one item with description
-    const validItems = lineItems.filter(item => item.description.trim() !== '');
+    const validItems = lineItems.filter(item => 
+      item.description.trim() !== '' && 
+      parseFloat(item.quantity) > 0 && 
+      parseFloat(item.rate) >= 0
+    );
+    
     if (validItems.length === 0) {
-      toast.error('Please add at least one item with a description');
+      toast.error('Please add at least one item with a description, quantity > 0, and rate >= 0');
       return;
     }
     
     // Remove id field and ensure only valid fields are sent
     const cleanItems = validItems.map(item => ({
       description: item.description.trim(),
-      quantity: parseFloat(item.quantity) || 0,
-      rate: parseFloat(item.rate) || 0,
-      taxRate: parseFloat(item.taxRate) || 0
+      quantity: Math.max(parseFloat(item.quantity) || 1, 0.01), // Ensure minimum 0.01
+      rate: Math.max(parseFloat(item.rate) || 0, 0), // Ensure minimum 0
+      taxRate: Math.max(parseFloat(item.taxRate) || 0, 0) // Ensure minimum 0
       // Note: total is calculated by backend, so we don't send it
     }));
     
@@ -221,8 +226,39 @@ const InvoiceForm = () => {
     };
     
     console.log('Final invoice data:', invoiceData);
+    console.log('Items being sent:', cleanItems);
     console.log('Mutation loading state:', mutation.isLoading);
-    mutation.mutate(invoiceData);
+    
+    // Additional validation before sending
+    const hasValidItems = cleanItems.every(item => 
+      item.description && 
+      item.description.trim() !== '' && 
+      item.quantity > 0 && 
+      item.rate >= 0
+    );
+    
+    if (!hasValidItems) {
+      toast.error('Please ensure all items have valid description, quantity > 0, and rate >= 0');
+      return;
+    }
+    
+    // Validate GST number length
+    if (data.client.gst && data.client.gst.length > 15) {
+      toast.error('GST number cannot exceed 15 characters');
+      return;
+    }
+    
+    // Clean GST number (remove extra characters if any)
+    const cleanedData = {
+      ...data,
+      client: {
+        ...data.client,
+        gst: data.client.gst ? data.client.gst.substring(0, 15) : ''
+      }
+    };
+    
+    console.log('Cleaned client data:', cleanedData.client);
+    mutation.mutate({...invoiceData, ...cleanedData});
   };
 
   if (isLoading) {
@@ -411,10 +447,34 @@ const InvoiceForm = () => {
                     GST Number
                   </label>
                   <input
-                    {...register('client.gst')}
+                    {...register('client.gst', {
+                      maxLength: {
+                        value: 15,
+                        message: 'GST number cannot exceed 15 characters'
+                      },
+                      pattern: {
+                        value: /^[A-Z0-9]{0,15}$/,
+                        message: 'GST number should contain only letters and numbers'
+                      }
+                    })}
                     className="form-input"
-                    placeholder="GST number"
+                    placeholder="GST number (max 15 characters)"
+                    maxLength={15}
+                    onChange={(e) => {
+                      const value = e.target.value.toUpperCase().substring(0, 15);
+                      e.target.value = value;
+                      setValue('client.gst', value);
+                    }}
                   />
+                  <div style={{fontSize: '12px', color: '#6b7280', marginTop: '4px'}}>
+                    {watch('client.gst')?.length || 0}/15 characters
+                  </div>
+                  {errors.client?.gst && (
+                    <div className="form-error">
+                      <FiAlertCircle className="h-4 w-4" />
+                      <span>{errors.client.gst.message}</span>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="form-group">

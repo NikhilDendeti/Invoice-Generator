@@ -14,6 +14,7 @@ import Dashboard from './pages/dashboard/Dashboard';
 import InvoiceList from './pages/invoice/InvoiceList';
 import InvoiceForm from './pages/invoice/InvoiceForm';
 import InvoiceView from './pages/invoice/InvoiceView';
+import PdfLibrary from './pages/pdf/PdfLibrary';
 import Settings from './pages/settings/Settings';
 import Profile from './pages/profile/Profile';
 
@@ -53,6 +54,7 @@ function AppContent() {
                 <Route path="/invoices/new" element={<InvoiceForm />} />
                 <Route path="/invoices/:id" element={<InvoiceView />} />
                 <Route path="/invoices/:id/edit" element={<InvoiceForm />} />
+                <Route path="/pdf-library" element={<PdfLibrary />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />

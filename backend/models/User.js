@@ -81,6 +81,40 @@ const userSchema = new mongoose.Schema({
   },
   lastLogin: {
     type: Date
+  },
+  pdfSettings: {
+    autoGenerate: {
+      type: Boolean,
+      default: false
+    },
+    defaultFormat: {
+      type: String,
+      default: 'A4',
+      enum: ['A4', 'Letter']
+    },
+    includeTerms: {
+      type: Boolean,
+      default: true
+    },
+    retentionDays: {
+      type: Number,
+      default: 30,
+      min: 1,
+      max: 365
+    }
+  },
+  pdfLibrary: {
+    totalPdfs: {
+      type: Number,
+      default: 0
+    },
+    totalSize: {
+      type: Number,
+      default: 0
+    },
+    lastGenerated: {
+      type: Date
+    }
   }
 }, {
   timestamps: true
@@ -110,6 +144,61 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 userSchema.methods.updateLastLogin = function() {
   this.lastLogin = new Date();
   return this.save({ validateBeforeSave: false });
+};
+
+// Update PDF library stats
+userSchema.methods.updatePdfStats = async function() {
+  const PdfRecord = require('./PdfRecord');
+  
+  const stats = await PdfRecord.aggregate([
+    { $match: { userId: this._id } },
+    {
+      $group: {
+        _id: null,
+        totalPdfs: { $sum: 1 },
+        totalSize: { $sum: '$fileSize' },
+        lastGenerated: { $max: '$generatedAt' }
+      }
+    }
+  ]);
+  
+  if (stats.length > 0) {
+    this.pdfLibrary.totalPdfs = stats[0].totalPdfs;
+    this.pdfLibrary.totalSize = stats[0].totalSize;
+    this.pdfLibrary.lastGenerated = stats[0].lastGenerated;
+  }
+  
+  return this.save({ validateBeforeSave: false });
+};
+
+// Get user's PDF library
+userSchema.methods.getPdfLibrary = async function(options = {}) {
+  const PdfRecord = require('./PdfRecord');
+  const Invoice = require('./Invoice');
+  
+  const { page = 1, limit = 10, sortBy = 'generatedAt', sortOrder = 'desc' } = options;
+  const skip = (page - 1) * limit;
+  
+  const sort = {};
+  sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+  
+  const pdfs = await PdfRecord.find({ userId: this._id })
+    .populate('invoiceId', 'invoiceNumber client.name total status')
+    .sort(sort)
+    .skip(skip)
+    .limit(limit);
+  
+  const total = await PdfRecord.countDocuments({ userId: this._id });
+  
+  return {
+    pdfs,
+    pagination: {
+      current: page,
+      pages: Math.ceil(total / limit),
+      total,
+      limit
+    }
+  };
 };
 
 module.exports = mongoose.model('User', userSchema);

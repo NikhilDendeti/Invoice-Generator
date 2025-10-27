@@ -529,6 +529,9 @@ class PdfService {
         includeTerms: options.includeTerms !== false
       });
 
+      // Update user's PDF stats
+      await user.updatePdfStats();
+
       return {
         pdfBuffer,
         pdfRecord,

@@ -20,6 +20,7 @@ require('./models/PdfRecord');
 const authRoutes = require('./routes/auth');
 const invoiceRoutes = require('./routes/invoices');
 const pdfRoutes = require('./routes/pdf');
+const pdfManagementRoutes = require('./routes/pdfManagement');
 
 // Import middleware
 const { generalLimiter } = require('./middleware/rateLimiter');
@@ -80,6 +81,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/pdf', pdfRoutes);
+app.use('/api/pdf', pdfManagementRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

@@ -85,6 +85,13 @@ export const pdfAPI = {
   
   // Email PDF
   emailPDF: (id, data) => api.post(`/pdf/${id}/email`, data),
+  
+  // PDF Library Management
+  getPdfLibrary: (params = {}) => api.get('/pdf/library', { params }),
+  getPdfStats: () => api.get('/pdf/library/stats'),
+  bulkDeletePdfs: (pdfIds) => api.delete('/pdf/library/bulk', { data: { pdfIds } }),
+  updatePdfSettings: (settings) => api.put('/pdf/settings', settings),
+  cleanupExpiredPdfs: () => api.post('/pdf/cleanup'),
 };
 
 export default api;
